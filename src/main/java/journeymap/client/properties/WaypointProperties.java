@@ -6,6 +6,7 @@
 package journeymap.client.properties;
 
 import com.google.common.base.Objects;
+import com.google.common.util.concurrent.AtomicDouble;
 import journeymap.client.properties.config.Config;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -49,8 +50,12 @@ public class WaypointProperties extends PropertiesBase implements Comparable<Way
     @Config(category = WaypointBeacon, key = "jm.waypoint.font_scale", minValue = 1, maxValue = 3, defaultValue = 2)
     public final AtomicInteger fontScale = new AtomicInteger(2);
 
-    @Config(category = WaypointBeacon, key = "jm.waypoint.texture_size")
-    public final AtomicBoolean textureSmall = new AtomicBoolean(true);
+
+    @Config(category = Waypoint, key = "jm.waypoint.fullscreen_icon_scale", minValue = 0.1, maxValue = 10.0, defaultValue = 1.0)
+    public final AtomicDouble fullscreenIconScale = new AtomicDouble(1D);
+
+    @Config(category = Waypoint, key = "jm.waypoint.minimap_icon_scale", minValue = 0.1, maxValue = 10.0, defaultValue = 1.0)
+    public final AtomicDouble minimapIconScale = new AtomicDouble(1D);
 
     @Config(category = Waypoint, key = "jm.waypoint.max_distance", minValue = 0, maxValue = 10000, defaultValue = 0)
     public final AtomicInteger maxDistance = new AtomicInteger(0);
@@ -101,7 +106,8 @@ public class WaypointProperties extends PropertiesBase implements Comparable<Way
         result = 31 * result + autoHideLabel.hashCode();
         result = 31 * result + boldLabel.hashCode();
         result = 31 * result + fontScale.hashCode();
-        result = 31 * result + textureSmall.hashCode();
+        result = 31 * result + fullscreenIconScale.hashCode();
+        result = 31 * result + minimapIconScale.hashCode();
         result = 31 * result + maxDistance.hashCode();
         result = 31 * result + createDeathpoints.hashCode();
         result = 31 * result + beaconFadeStart.hashCode();
@@ -120,6 +126,8 @@ public class WaypointProperties extends PropertiesBase implements Comparable<Way
                 .add("createDeathpoints", createDeathpoints)
                 .add("fontScale", fontScale)
                 .add("managerEnabled", managerEnabled)
+                .add("fullscreenIconScale", fullscreenIconScale)
+                .add("minimapIconScale", minimapIconScale)
                 .add("maxDistance", maxDistance)
                 .add("name", name)
                 .add("showDistance", showDistance)
@@ -127,7 +135,6 @@ public class WaypointProperties extends PropertiesBase implements Comparable<Way
                 .add("showRotatingBeam", showRotatingBeam)
                 .add("showStaticBeam", showStaticBeam)
                 .add("showTexture", showTexture)
-                .add("textureSmall", textureSmall)
                 .add("beaconFadeStart", beaconFadeStart)
                 .add("beaconFadeEnd", beaconFadeEnd)
                 .toString();
