@@ -8,6 +8,8 @@ package journeymap.client.ui.option;
 import com.google.common.base.Joiner;
 import com.google.common.io.Files;
 import com.google.common.util.concurrent.AtomicDouble;
+import journeymap.client.api.settings.SettingsPageDefinition;
+import journeymap.client.api.settings.SettingsPageRegistry;
 import journeymap.client.Constants;
 import journeymap.client.JourneymapClient;
 import journeymap.client.cartography.RGB;
@@ -68,6 +70,11 @@ public class OptionSlotFactory
             }
 
             categories.add(categorySlot);
+        }
+
+        for (SettingsPageDefinition pageDefinition : SettingsPageRegistry.getInstance().getPages())
+        {
+            categories.add(new ExternalSettingsCategorySlot(pageDefinition));
         }
 
         Collections.sort(categories);
@@ -306,7 +313,8 @@ public class OptionSlotFactory
             String defaultTip = Constants.getString("jm.config.default_numeric", annotation.minValue(), annotation.maxValue(), annotation.defaultValue());
             boolean advanced = annotation.category() == Config.Category.Advanced;
 
-            DoubleSliderButton button = new DoubleSliderButton(properties, property, name + " : ", "", (double) annotation.minValue(), (double) annotation.maxValue(), true);
+            String suffix = annotation.key().contains("_scale") ? "x" : "";
+            DoubleSliderButton button = new DoubleSliderButton(properties, property, name + " : ", suffix, (double) annotation.minValue(), (double) annotation.maxValue(), true);
             button.setDefaultStyle(false);
             button.setDrawBackground(false);
             SlotMetadata<Double> slotMetadata = new SlotMetadata<Double>(button, name, tooltip, defaultTip, (double) annotation.defaultValue(), advanced);
