@@ -17,6 +17,7 @@ import journeymap.client.log.StatTimer;
 import journeymap.client.model.MapState;
 import journeymap.client.model.MapType;
 import journeymap.client.properties.MiniMapProperties;
+import journeymap.client.properties.WaypointProperties;
 import journeymap.client.render.draw.DrawUtil;
 import journeymap.client.render.draw.DrawWayPointStep;
 import journeymap.client.render.draw.RadarDrawStepFactory;
@@ -24,6 +25,7 @@ import journeymap.client.render.draw.WaypointDrawStepFactory;
 import journeymap.client.render.map.GridRenderer;
 import journeymap.client.render.texture.TextureCache;
 import journeymap.client.render.texture.TextureImpl;
+import journeymap.client.ui.util.SmoothDoubleState;
 import journeymap.common.Journeymap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.biome.BiomeGenBase;
@@ -71,6 +73,11 @@ public class MiniMap
     private long initTime;
     private long lastRotationTime = 0;
     private double smoothedRotation = Double.NaN;
+    private static final double ZOOM_SMOOTHING_RESPONSE = 18D;
+    private static final double ZOOM_SMOOTHING_MAX_DELTA_SECONDS = 0.05D;
+    private static final double ZOOM_SMOOTHING_SNAP_THRESHOLD = 0.001D;
+    private static final double ZOOM_SMOOTHING_JUMP_THRESHOLD = 6D;
+    private SmoothDoubleState visualZoomLevel = new SmoothDoubleState();
 
     /**
      * Default constructor
@@ -183,8 +190,11 @@ public class MiniMap
                 timer.start();
             }
 
+            int zoomLevel = miniMapProperties.zoomLevel.get();
+            updateVisualZoomLevel(zoomLevel);
+
             // Update the grid
-            boolean moved = gridRenderer.center(state.getCurrentMapType(), mc.thePlayer.posX, mc.thePlayer.posZ, miniMapProperties.zoomLevel.get());
+            boolean moved = gridRenderer.center(state.getCurrentMapType(), mc.thePlayer.posX, mc.thePlayer.posZ, zoomLevel);
             if (moved || doStateRefresh)
             {
                 boolean showCaves = shouldShowCaves();
@@ -256,27 +266,46 @@ public class MiniMap
             {
                 // Move origin to top-left corner
                 GL11.glTranslated(dv.translateX, dv.translateY, 0);
-
-                // Draw grid
-                gridRenderer.draw(dv.terrainAlpha, 0, 0, miniMapProperties.showGrid.get());
-
-                // Draw entities, etc
-
-                gridRenderer.draw(state.getDrawSteps(), 0, 0, dv.drawScale, dv.fontScale, rotation);
-
-                // Get center of minimap and rect of minimap
-                centerPoint = gridRenderer.getPixel(mc.thePlayer.posX, mc.thePlayer.posZ);
-                centerRect = new Rectangle2D.Double(centerPoint.x - dv.minimapWidth / 2, centerPoint.y - dv.minimapHeight / 2, dv.minimapWidth, dv.minimapHeight);
-
-                // Draw waypoints
-                drawOnMapWaypoints(rotation);
-
-                // Draw player
-                if (miniMapProperties.showSelf.get() && playerLocatorTex != null)
+                double renderZoomScale = getRenderZoomScale();
+                gridRenderer.setVisualScale(renderZoomScale);
+                float playerArrowDrawScale = dv.drawScale * (float) miniMapProperties.playerArrowScale.get();
+                boolean scaleMap = renderZoomScale != 1D;
+                if (scaleMap)
                 {
-                    if (centerPoint != null)
+                    GL11.glPushMatrix();
+                }
+                try
+                {
+                    if (scaleMap)
                     {
-                        DrawUtil.drawEntity(centerPoint.getX(), centerPoint.getY(), playerHeading, false, playerLocatorTex, dv.drawScale, rotation);
+                        applyMapZoomScale(mc.displayWidth / 2D, mc.displayHeight / 2D, renderZoomScale);
+                    }
+                    gridRenderer.updateRotation(rotation);
+
+                    // Draw grid
+                    gridRenderer.draw(dv.terrainAlpha, 0, 0, miniMapProperties.showGrid.get());
+
+                    // Draw entities, etc
+                    gridRenderer.draw(state.getDrawSteps(), 0, 0, dv.drawScale, dv.fontScale, rotation);
+
+                    // Get center of minimap and rect of minimap
+                    centerPoint = gridRenderer.getPixel(mc.thePlayer.posX, mc.thePlayer.posZ);
+                    centerRect = new Rectangle2D.Double(centerPoint.x - dv.minimapWidth / 2, centerPoint.y - dv.minimapHeight / 2, dv.minimapWidth, dv.minimapHeight);
+
+                    // Draw waypoints
+                    drawOnMapWaypoints(rotation);
+
+                    // Draw player
+                    if (miniMapProperties.showSelf.get() && playerLocatorTex != null && centerPoint != null)
+                    {
+                        DrawUtil.drawEntity(centerPoint.getX(), centerPoint.getY(), playerHeading, false, playerLocatorTex, playerArrowDrawScale, rotation);
+                    }
+                }
+                finally
+                {
+                    if (scaleMap)
+                    {
+                        GL11.glPopMatrix();
                     }
                 }
 
@@ -361,7 +390,7 @@ public class MiniMap
                 GL11.glTranslated(dv.translateX, dv.translateY, 0);
 
                 // Draw off-screen waypoints on top of frame
-                drawOffMapWaypoints(rotation);
+                drawOffMapWaypoints(rotation, renderZoomScale);
 
                 // Draw cardinal compass point labels
                 if (dv.showCompass)
@@ -416,6 +445,7 @@ public class MiniMap
     private void drawOnMapWaypoints(double rotation)
     {
         boolean showLabel = miniMapProperties.showWaypointLabels.get();
+        float waypointDrawScale = getWaypointDrawScale();
         for (DrawWayPointStep drawWayPointStep : state.getDrawWaypointSteps())
         {
             Point2D.Double waypointPos = drawWayPointStep.getPosition(0, 0, gridRenderer, true);
@@ -424,13 +454,14 @@ public class MiniMap
             if (onScreen)
             {
                 drawWayPointStep.setShowLabel(showLabel);
-                drawWayPointStep.draw(0, 0, gridRenderer, dv.drawScale, dv.fontScale, rotation);
+                drawWayPointStep.draw(0, 0, gridRenderer, waypointDrawScale, dv.fontScale, rotation);
             }
         }
     }
 
-    private void drawOffMapWaypoints(double rotation)
+    private void drawOffMapWaypoints(double rotation, double renderZoomScale)
     {
+        float waypointDrawScale = getWaypointDrawScale() * (float) renderZoomScale;
         for (DrawWayPointStep drawWayPointStep : state.getDrawWaypointSteps())
         {
             if (!drawWayPointStep.isOnScreen())
@@ -441,9 +472,15 @@ public class MiniMap
                         dv.minimapSpec.waypointOffset);
 
                 //point = drawWayPointStep.getPosition(0, 0, gridRenderer, false);
-                drawWayPointStep.drawOffscreen(point, rotation);
+                drawWayPointStep.drawOffscreen(point, waypointDrawScale, rotation);
             }
         }
+    }
+
+    private float getWaypointDrawScale()
+    {
+        WaypointProperties waypointProperties = JourneymapClient.getWaypointProperties();
+        return dv.drawScale * (float) waypointProperties.minimapIconScale.get();
     }
 
     private void startMapRotation(double rotation)
@@ -485,6 +522,39 @@ public class MiniMap
         smoothedRotation = normalizeAngle(smoothedRotation + normalizeAngle(targetRotation - smoothedRotation) * alpha);
         lastRotationTime = now;
         return smoothedRotation;
+    }
+
+    private void updateVisualZoomLevel(int targetZoom)
+    {
+        if (!miniMapProperties.smoothZoom.get())
+        {
+            visualZoomLevel.snapTo(targetZoom);
+            return;
+        }
+        if (!visualZoomLevel.isInitialized())
+        {
+            visualZoomLevel.snapTo(targetZoom);
+        }
+        visualZoomLevel.updateTowards(targetZoom, ZOOM_SMOOTHING_RESPONSE, ZOOM_SMOOTHING_MAX_DELTA_SECONDS,
+                ZOOM_SMOOTHING_SNAP_THRESHOLD, ZOOM_SMOOTHING_JUMP_THRESHOLD);
+    }
+
+    private double getRenderZoomScale()
+    {
+        int targetZoom = miniMapProperties.zoomLevel.get();
+        double visualZoom = miniMapProperties.smoothZoom.get() ? visualZoomLevel.getValue() : targetZoom;
+        return Math.pow(2D, visualZoom - targetZoom);
+    }
+
+    private void applyMapZoomScale(double centerX, double centerY, double scale)
+    {
+        if (scale == 1D)
+        {
+            return;
+        }
+        GL11.glTranslated(centerX, centerY, 0);
+        GL11.glScaled(scale, scale, 1D);
+        GL11.glTranslated(-centerX, -centerY, 0);
     }
 
     private float getInterpolatedPlayerYawHead(float partialTicks)
@@ -530,7 +600,7 @@ public class MiniMap
     {
         if (dv.shape == Shape.Circle)
         {
-            return centerPixel.distance(objectPixel) < dv.minimapWidth / 2;
+            return centerPixel.distance(objectPixel) < (dv.minimapWidth / 2D) / gridRenderer.getVisualScale();
         }
         else
         {
@@ -646,6 +716,8 @@ public class MiniMap
         initTime = System.currentTimeMillis();
         lastRotationTime = 0;
         smoothedRotation = Double.NaN;
+        visualZoomLevel.clear();
+        visualZoomLevel.snapTo(miniMapProperties.zoomLevel.get());
         initGridRenderer();
         updateDisplayVars(miniMapProperties.shape.get(), miniMapProperties.position.get(), true);
         MiniMapOverlayHandler.checkEventConfig();
