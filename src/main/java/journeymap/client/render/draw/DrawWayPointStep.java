@@ -24,7 +24,6 @@ public class DrawWayPointStep implements DrawStep
     public final Waypoint waypoint;
     final Integer color;
     final Integer fontColor;
-    final TextureImpl texture;
     final boolean isEdit;
     Point2D.Double lastPosition;
     Point2D.Double lastWindowPosition;
@@ -54,7 +53,6 @@ public class DrawWayPointStep implements DrawStep
         this.color = color;
         this.fontColor = fontColor;
         this.isEdit = isEdit;
-        this.texture = waypoint.getTexture();
     }
 
     public void setShowLabel(boolean showLabel)
@@ -70,18 +68,18 @@ public class DrawWayPointStep implements DrawStep
             return;
         }
 
+        TextureImpl texture = waypoint.getTexture();
         float renderScale = getRenderScale(drawScale);
         double textureWidth = texture.getWidth() * renderScale;
         double textureHeight = texture.getHeight() * renderScale;
         Point2D.Double pixel = getPosition(xOffset, yOffset, gridRenderer, true);
         if (gridRenderer.isOnScreen(pixel))
         {
-            if (showLabel)
-            {
-                int labelOffsetY = (int) Math.round(rotation == 0 ? -textureHeight : textureHeight);
-                Point2D labelPoint = gridRenderer.shiftWindowPosition(pixel.getX(), pixel.getY(), 0, labelOffsetY);
-                DrawUtil.drawLabel(NAME_FORMATTER.formatLabel(waypoint), labelPoint.getX(), labelPoint.getY(), DrawUtil.HAlign.Center, DrawUtil.VAlign.Middle, RGB.BLACK_RGB, 180, fontColor, 255, fontScale, false, rotation);
-            }
+            DrawUtil.drawColoredImage(texture, 255, color,
+                    pixel.getX() - (textureWidth / 2D),
+                    pixel.getY() - (textureHeight / 2D),
+                    renderScale,
+                    -rotation);
             if (isEdit)
             {
                 TextureImpl editTex = TextureCache.instance().getWaypointEdit();
@@ -91,11 +89,12 @@ public class DrawWayPointStep implements DrawStep
                         renderScale,
                         -rotation);
             }
-            DrawUtil.drawColoredImage(texture, 255, color,
-                    pixel.getX() - (textureWidth / 2D),
-                    pixel.getY() - (textureHeight / 2D),
-                    renderScale,
-                    -rotation);
+            if (showLabel)
+            {
+                int labelOffsetY = (int) Math.round(rotation == 0 ? -textureHeight : textureHeight);
+                Point2D labelPoint = gridRenderer.shiftWindowPosition(pixel.getX(), pixel.getY(), 0, labelOffsetY);
+                DrawUtil.drawLabel(NAME_FORMATTER.formatLabel(waypoint), labelPoint.getX(), labelPoint.getY(), DrawUtil.HAlign.Center, DrawUtil.VAlign.Middle, RGB.BLACK_RGB, 180, fontColor, 255, fontScale, false, rotation);
+            }
         }
         else if (!isEdit)
         {
@@ -111,6 +110,7 @@ public class DrawWayPointStep implements DrawStep
 
     public void drawOffscreen(Point2D pixel, float drawScale, double rotation)
     {
+        TextureImpl texture = waypoint.getTexture();
         float renderScale = getRenderScale(drawScale);
         double textureWidth = texture.getWidth() * renderScale;
         double textureHeight = texture.getHeight() * renderScale;
@@ -146,11 +146,12 @@ public class DrawWayPointStep implements DrawStep
 
     public int getTextureHeight()
     {
-        return texture.getHeight();
+        return waypoint.getTexture().getHeight();
     }
 
     public int getTextureSize()
     {
+        TextureImpl texture = waypoint.getTexture();
         return Math.max(texture.getHeight(), texture.getWidth());
     }
 

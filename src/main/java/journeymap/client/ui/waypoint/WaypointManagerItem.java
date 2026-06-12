@@ -10,7 +10,6 @@ import journeymap.client.cartography.RGB;
 import journeymap.client.command.CmdTeleportWaypoint;
 import journeymap.client.forge.helper.ForgeHelper;
 import journeymap.client.model.Waypoint;
-import journeymap.client.model.WaypointDisplayNameFormatter;
 import journeymap.client.render.draw.DrawUtil;
 import journeymap.client.render.texture.TextureImpl;
 import journeymap.client.ui.UIManager;
@@ -40,7 +39,6 @@ public class WaypointManagerItem implements ScrollListPane.ISlot
 
     static Integer background = new Color(20, 20, 20).getRGB();
     static Integer backgroundHover = new Color(40, 40, 40).getRGB();
-    static WaypointDisplayNameFormatter nameFormatter = new WaypointDisplayNameFormatter();
     final FontRenderer fontRenderer;
     final WaypointManager manager;
     int x;
@@ -173,7 +171,7 @@ public class WaypointManagerItem implements ScrollListPane.ISlot
         int yOffset = 1 + (this.manager.rowHeight - fr.FONT_HEIGHT) / 2;
         fr.drawStringWithShadow(String.format("%sm", getDistance()), x + manager.colLocation, y + yOffset, color);
 
-        String name = nameFormatter.formatManagerLabel(waypoint, waypointValid);
+        String name = waypointValid ? waypoint.getName() : EnumChatFormatting.STRIKETHROUGH + waypoint.getName();
         fr.drawStringWithShadow(name, manager.colName, y + yOffset, color);
     }
 

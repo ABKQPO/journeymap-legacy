@@ -19,13 +19,4 @@ public class WaypointDisplayNameFormatter
         return label;
     }
 
-    public String formatManagerLabel(Waypoint waypoint, boolean waypointVisible)
-    {
-        String label = formatLabel(waypoint);
-        if (!waypointVisible)
-        {
-            return EnumChatFormatting.STRIKETHROUGH + label;
-        }
-        return label;
-    }
 }
