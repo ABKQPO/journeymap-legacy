@@ -2,6 +2,9 @@ package journeymap.client.api.settings;
 
 import java.util.concurrent.Callable;
 
+/**
+ * Describes one externally provided setting row in the JourneyMap options GUI.
+ */
 public class ExternalSettingEntry
 {
     private String id;
@@ -170,6 +173,7 @@ public class ExternalSettingEntry
         }
         catch (Exception ignored)
         {
+            // A broken integration should not prevent JourneyMap from opening its options GUI.
             return fallback;
         }
     }

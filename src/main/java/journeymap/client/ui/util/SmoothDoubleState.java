@@ -1,5 +1,8 @@
 package journeymap.client.ui.util;
 
+/**
+ * Smooths a numeric value using exponential response over real frame time.
+ */
 public class SmoothDoubleState
 {
     private double value;
@@ -41,6 +44,7 @@ public class SmoothDoubleState
         lastUpdateNanos = now;
         if (Math.abs(value - target) > jumpThreshold)
         {
+            // Large jumps are intentional state changes, not animation frames to blend through.
             value = target;
         }
         else if (deltaSeconds > 0D)

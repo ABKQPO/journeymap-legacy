@@ -959,7 +959,7 @@ public class Fullscreen extends JmUI
                     }
                 }
 
-                gridRenderer.draw(layerDelegate.getDrawSteps(), xOffset, yOffset, waypointDrawScale, getMapFontScale(), 0);
+                gridRenderer.draw(layerDelegate.getMapDrawSteps(), xOffset, yOffset, waypointDrawScale, getMapFontScale(), 0);
             }
             finally
             {
@@ -968,6 +968,9 @@ public class Fullscreen extends JmUI
                     GL11.glPopMatrix();
                 }
             }
+
+            // Draw fixed HUD overlays after the map matrix has been restored.
+            gridRenderer.draw(layerDelegate.getScreenDrawSteps(), xOffset, yOffset, waypointDrawScale, getMapFontScale(), 0);
 
             DrawUtil.drawLabel(state.playerLastPos, mc.displayWidth / 2, mc.displayHeight, DrawUtil.HAlign.Center, DrawUtil.VAlign.Above,
                     statusBackgroundColor, statusBackgroundAlpha, statusForegroundColor, statusForegroundAlpha, getMapFontScale(), true);

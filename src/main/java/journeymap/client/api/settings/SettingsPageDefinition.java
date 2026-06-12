@@ -5,6 +5,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * Defines one external settings page and the entries JourneyMap should render under it.
+ */
 public class SettingsPageDefinition
 {
     private String pageId;
@@ -29,6 +32,7 @@ public class SettingsPageDefinition
         {
             this.entries.addAll(entries);
         }
+        // Sort once during construction so the options screen can render pages without mutating providers.
         Collections.sort(this.entries, new Comparator<ExternalSettingEntry>()
         {
             @Override

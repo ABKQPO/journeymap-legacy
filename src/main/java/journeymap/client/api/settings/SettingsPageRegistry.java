@@ -7,6 +7,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Registry for external settings pages shown in the JourneyMap options GUI.
+ */
 public class SettingsPageRegistry
 {
     private static final SettingsPageRegistry INSTANCE = new SettingsPageRegistry();
@@ -52,6 +55,7 @@ public class SettingsPageRegistry
         List<SettingsPageDefinition> pages = new ArrayList<SettingsPageDefinition>();
         pages.addAll(pageDefinitions.values());
 
+        // Keep page order stable so reopening the options GUI does not reshuffle external pages.
         Collections.sort(pages, new Comparator<SettingsPageDefinition>()
         {
             @Override

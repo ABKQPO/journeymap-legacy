@@ -1,5 +1,8 @@
 package journeymap.client.api.fullscreen.context;
 
+/**
+ * Describes one entry in the fullscreen map context menu.
+ */
 public class FullscreenContextMenuEntry
 {
     private String actionId;
@@ -41,6 +44,9 @@ public class FullscreenContextMenuEntry
         return enabled;
     }
 
+    /**
+     * Returns false for informational rows that should render like menu items but ignore clicks.
+     */
     public boolean isInteractive()
     {
         return interactive;

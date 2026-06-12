@@ -4,6 +4,9 @@ import journeymap.client.model.Waypoint;
 
 import java.util.Collection;
 
+/**
+ * Immutable snapshot of the map target used to build and handle a fullscreen context menu.
+ */
 public class FullscreenContextMenuContext
 {
     private final FullscreenContextTargetType targetType;
@@ -46,11 +49,17 @@ public class FullscreenContextMenuContext
         return resolvedY;
     }
 
+    /**
+     * Returns the known terrain height for labels, or null when the target is unexplored.
+     */
     public Integer getDisplayY()
     {
         return displayY;
     }
 
+    /**
+     * Returns true when the map target has a known terrain height to show in labels.
+     */
     public boolean hasDisplayY()
     {
         return displayY != null;
