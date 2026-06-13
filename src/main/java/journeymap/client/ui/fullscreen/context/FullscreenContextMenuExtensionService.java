@@ -1,11 +1,9 @@
 package journeymap.client.ui.fullscreen.context;
 
-import journeymap.client.api.fullscreen.context.FullscreenContextMenuActionResult;
 import journeymap.client.api.fullscreen.context.FullscreenContextMenuContext;
 import journeymap.client.api.fullscreen.context.FullscreenContextMenuEntry;
 import journeymap.client.api.fullscreen.context.FullscreenContextMenuProvider;
 import journeymap.client.api.fullscreen.context.FullscreenContextMenuRegistry;
-import journeymap.client.api.fullscreen.context.FullscreenContextTargetType;
 import journeymap.client.model.Waypoint;
 import journeymap.common.Journeymap;
 
@@ -21,8 +19,7 @@ public class FullscreenContextMenuExtensionService
         {
             Waypoint waypoint = ((WaypointContextTarget) target).getWaypoint();
             List<Integer> dimensions = new ArrayList<Integer>(waypoint.getDimensions());
-            return new FullscreenContextMenuContext(FullscreenContextTargetType.WAYPOINT,
-                    waypoint.getX(),
+            return new FullscreenContextMenuContext(waypoint.getX(),
                     waypoint.getY(),
                     waypoint.getY(),
                     waypoint.getZ(),
@@ -34,8 +31,7 @@ public class FullscreenContextMenuExtensionService
         }
 
         MapLocationContextTarget locationTarget = (MapLocationContextTarget) target;
-        return new FullscreenContextMenuContext(FullscreenContextTargetType.MAP_LOCATION,
-                locationTarget.getX(),
+        return new FullscreenContextMenuContext(locationTarget.getX(),
                 locationTarget.getResolvedY(),
                 locationTarget.getDisplayY(),
                 locationTarget.getZ(),
@@ -75,23 +71,22 @@ public class FullscreenContextMenuExtensionService
         return items;
     }
 
-    public FullscreenContextMenuActionResult execute(FullscreenContextMenuItem item, FullscreenContextMenuContext context)
+    public boolean execute(FullscreenContextMenuItem item, FullscreenContextMenuContext context)
     {
         FullscreenContextMenuProvider provider = item.getProvider();
         if (provider == null)
         {
-            return FullscreenContextMenuActionResult.CLOSE_MENU;
+            return true;
         }
 
         try
         {
-            FullscreenContextMenuActionResult result = provider.onMenuItemClicked(context, item.getActionId());
-            return result == null ? FullscreenContextMenuActionResult.KEEP_MENU_OPEN : result;
+            return provider.onMenuItemClicked(context, item.getActionId());
         }
         catch (Throwable t)
         {
             Journeymap.getLogger().error("Failed to execute fullscreen context menu action {} for provider {}: {}", item.getActionId(), provider.getClass().getName(), String.valueOf(t));
-            return FullscreenContextMenuActionResult.KEEP_MENU_OPEN;
+            return false;
         }
     }
 

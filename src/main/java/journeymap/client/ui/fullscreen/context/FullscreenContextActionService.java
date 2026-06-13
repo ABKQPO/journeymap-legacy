@@ -2,8 +2,6 @@ package journeymap.client.ui.fullscreen.context;
 
 import journeymap.client.command.CmdTeleportWaypoint;
 import journeymap.client.model.Waypoint;
-import journeymap.client.model.WaypointLifecycle;
-import journeymap.client.model.WaypointVisibility;
 import journeymap.client.ui.UIManager;
 import journeymap.client.ui.component.JmUI;
 import journeymap.client.ui.fullscreen.Fullscreen;
@@ -21,21 +19,21 @@ public class FullscreenContextActionService
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
     }
 
-    public Waypoint createWaypoint(MapLocationContextTarget target, WaypointLifecycle lifecycle)
+    public Waypoint createWaypoint(MapLocationContextTarget target, boolean temporary)
     {
         Waypoint waypoint = Waypoint.at(target.getX(), target.getResolvedY(), target.getZ(), Waypoint.Type.Normal, target.getDimension());
-        waypoint.setLifecycle(lifecycle);
+        waypoint.setTemporary(temporary);
         return waypoint;
     }
 
-    public void openWaypointEditor(MapLocationContextTarget target, WaypointLifecycle lifecycle, JmUI returnDisplay)
+    public void openWaypointEditor(MapLocationContextTarget target, boolean temporary, JmUI returnDisplay)
     {
-        UIManager.getInstance().openWaypointEditor(createWaypoint(target, lifecycle), true, returnDisplay);
+        UIManager.getInstance().openWaypointEditor(createWaypoint(target, temporary), true, returnDisplay);
     }
 
-    public Waypoint quickCreateWaypoint(MapLocationContextTarget target, WaypointLifecycle lifecycle)
+    public Waypoint quickCreateWaypoint(MapLocationContextTarget target, boolean temporary)
     {
-        Waypoint waypoint = createWaypoint(target, lifecycle);
+        Waypoint waypoint = createWaypoint(target, temporary);
         WaypointStore.instance().save(waypoint);
         refreshMapState();
         return waypoint;
@@ -53,15 +51,15 @@ public class FullscreenContextActionService
 
     public void toggleWaypointVisibility(Waypoint waypoint)
     {
-        waypoint.setVisibility(waypoint.getVisibility() == WaypointVisibility.ENABLED ? WaypointVisibility.DISABLED : WaypointVisibility.ENABLED);
+        waypoint.setEnable(!waypoint.isEnable());
         WaypointStore.instance().save(waypoint);
         refreshMapState();
     }
 
     public void restoreWaypoint(Waypoint waypoint)
     {
-        waypoint.setVisibility(WaypointVisibility.ENABLED);
-        waypoint.setLifecycle(WaypointLifecycle.PERSISTENT);
+        waypoint.setEnable(true);
+        waypoint.setPersistent(true);
         WaypointStore.instance().save(waypoint);
         refreshMapState();
     }
@@ -80,7 +78,7 @@ public class FullscreenContextActionService
         }
 
         MapLocationContextTarget locationTarget = (MapLocationContextTarget) target;
-        return createWaypoint(locationTarget, WaypointLifecycle.PERSISTENT);
+        return createWaypoint(locationTarget, false);
     }
 
     private void refreshMapState()

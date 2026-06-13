@@ -1,12 +1,10 @@
 package journeymap.client.ui.fullscreen.context;
 
-import journeymap.client.api.fullscreen.context.FullscreenContextMenuActionResult;
 import journeymap.client.api.fullscreen.context.FullscreenContextMenuContext;
 import journeymap.client.Constants;
 import journeymap.client.command.CmdTeleportWaypoint;
 import journeymap.client.forge.helper.ForgeHelper;
 import journeymap.client.model.Waypoint;
-import journeymap.client.model.WaypointLifecycle;
 import journeymap.client.render.draw.DrawUtil;
 import journeymap.client.ui.UIManager;
 import journeymap.client.ui.component.Button;
@@ -283,11 +281,11 @@ public class FullscreenContextMenu
         }
         else if ("create_waypoint".equals(actionId))
         {
-            actionService.openWaypointEditor(toLocationTarget(target), WaypointLifecycle.PERSISTENT, owner);
+            actionService.openWaypointEditor(toLocationTarget(target), false, owner);
         }
         else if ("create_temporary_waypoint".equals(actionId))
         {
-            actionService.quickCreateWaypoint(toLocationTarget(target), WaypointLifecycle.TEMPORARY);
+            actionService.quickCreateWaypoint(toLocationTarget(target), true);
             owner.clearContextSelection();
         }
         else if ("teleport_here".equals(actionId))
@@ -327,8 +325,7 @@ public class FullscreenContextMenu
         }
         else
         {
-            FullscreenContextMenuActionResult result = extensionService.execute(item, context);
-            if (result == FullscreenContextMenuActionResult.CLOSE_MENU)
+            if (extensionService.execute(item, context))
             {
                 close();
             }
