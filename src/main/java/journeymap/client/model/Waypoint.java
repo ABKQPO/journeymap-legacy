@@ -69,6 +69,9 @@ public class Waypoint implements Serializable
     protected boolean enable;
 
     @Since(1)
+    protected boolean temporary;
+
+    @Since(1)
     protected Type type;
 
     @Since(1)
@@ -94,6 +97,7 @@ public class Waypoint implements Serializable
         this.x = original.x;
         this.y = original.y;
         this.z = original.z;
+        this.temporary = original.temporary;
     }
 
     public Waypoint(String name, int posX, int posY, int posZ, Color color, Type type, Integer currentDimension)
@@ -380,6 +384,20 @@ public class Waypoint implements Serializable
         }
     }
 
+    public boolean isTemporary()
+    {
+        return temporary;
+    }
+
+    public void setTemporary(boolean temporary)
+    {
+        if (temporary != this.temporary)
+        {
+            this.temporary = temporary;
+            this.dirty = true;
+        }
+    }
+
     public Type getType()
     {
         return type;
@@ -454,6 +472,10 @@ public class Waypoint implements Serializable
             return false;
         }
         if (g != waypoint.g)
+        {
+            return false;
+        }
+        if (temporary != waypoint.temporary)
         {
             return false;
         }

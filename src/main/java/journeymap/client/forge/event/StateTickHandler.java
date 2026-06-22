@@ -88,7 +88,7 @@ public class StateTickHandler implements EventHandlerManager.EventHandler
             {
                 mc.mcProfiler.startSection("mainTasks");
                 JourneymapClient.getInstance().performMainThreadTasks();
-                removeArrivedDeathpoints();
+                removeArrivedWaypoints();
                 counter = 0;
                 mc.mcProfiler.endSection();
             }
@@ -166,11 +166,11 @@ public class StateTickHandler implements EventHandlerManager.EventHandler
         }
     }
 
-    private void removeArrivedDeathpoints()
+    private void removeArrivedWaypoints()
     {
         EntityPlayer player = mc.thePlayer;
         WaypointProperties properties = JourneymapClient.getWaypointProperties();
-        if (player == null || player.isDead || !properties.deleteDeathpointOnArrival.get())
+        if (player == null || player.isDead)
         {
             return;
         }
@@ -178,7 +178,7 @@ public class StateTickHandler implements EventHandlerManager.EventHandler
         List<Waypoint> pendingRemovals = null;
         for (Waypoint waypoint : WaypointStore.instance().getAll())
         {
-            if (waypoint.isDeathPoint() && shouldRemoveOnArrival(waypoint, properties, player))
+            if (shouldRemoveWaypointOnArrival(waypoint, properties) && shouldRemoveOnArrival(waypoint, properties, player))
             {
                 if (pendingRemovals == null)
                 {
@@ -195,6 +195,15 @@ public class StateTickHandler implements EventHandlerManager.EventHandler
                 WaypointStore.instance().remove(waypoint);
             }
         }
+    }
+
+    private boolean shouldRemoveWaypointOnArrival(Waypoint waypoint, WaypointProperties properties)
+    {
+        if (waypoint.isTemporary())
+        {
+            return true;
+        }
+        return waypoint.isDeathPoint() && properties.deleteDeathpointOnArrival.get();
     }
 
     private boolean shouldRemoveOnArrival(Waypoint waypoint, WaypointProperties properties, EntityPlayer player)
