@@ -1,4 +1,4 @@
-/*
+﻿/*
  * JourneyMap Mod <journeymap.info> for Minecraft
  * Copyright (c) 2011-2017  Techbrew Interactive, LLC <techbrew.net>.  All Rights Reserved.
  */
@@ -288,7 +288,6 @@ public class RenderWaypointBeacon
                 renderHelper.glDisableDepth();
                 renderHelper.glDepthMask(false);
 
-                scale = scale * 1;
 
                 GL11.glTranslated(shiftX, shiftY, shiftZ);
                 GL11.glRotatef(-renderManager.playerViewY, 0.0F, 1.0F, 0.0F);

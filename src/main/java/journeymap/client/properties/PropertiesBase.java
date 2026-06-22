@@ -1,4 +1,4 @@
-/*
+﻿/*
  * JourneyMap Mod <journeymap.info> for Minecraft
  * Copyright (c) 2011-2017  Techbrew Interactive, LLC <techbrew.net>.  All Rights Reserved.
  */
@@ -39,7 +39,8 @@ public abstract class PropertiesBase
     protected static transient final AtomicBoolean configFormatChanged = new AtomicBoolean(false);
 
     // Headers to output before file
-    private static final String[] HEADERS = {
+    private static final String[] HEADERS =
+    {
             "// " + Constants.getString("jm.config.file_header_1"),
             "// " + Constants.getString("jm.config.file_header_2", Constants.CONFIG_DIR),
             // "// " + Constants.getString("jm.config.file_header_3", Constants.DATA_DIR + File.separator + "**" + File.separator),

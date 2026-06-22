@@ -1,4 +1,4 @@
-/*
+﻿/*
  * JourneyMap Mod <journeymap.info> for Minecraft
  * Copyright (c) 2011-2017  Techbrew Interactive, LLC <techbrew.net>.  All Rights Reserved.
  */
@@ -36,6 +36,8 @@ public @interface Config
     double maxValue() default 0;
 
     double defaultValue() default 0;
+
+    String suffix() default "";
 
     boolean defaultBoolean() default true;
 

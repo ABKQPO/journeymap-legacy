@@ -1,4 +1,4 @@
-/*
+﻿/*
  * JourneyMap Mod <journeymap.info> for Minecraft
  * Copyright (c) 2011-2017  Techbrew Interactive, LLC <techbrew.net>.  All Rights Reserved.
  */
@@ -73,10 +73,6 @@ public class MiniMap
     private long initTime;
     private long lastRotationTime = 0;
     private double smoothedRotation = Double.NaN;
-    private static final double ZOOM_SMOOTHING_RESPONSE = 18D;
-    private static final double ZOOM_SMOOTHING_MAX_DELTA_SECONDS = 0.05D;
-    private static final double ZOOM_SMOOTHING_SNAP_THRESHOLD = 0.001D;
-    private static final double ZOOM_SMOOTHING_JUMP_THRESHOLD = 6D;
     private SmoothDoubleState visualZoomLevel = new SmoothDoubleState();
 
     /**
@@ -191,7 +187,7 @@ public class MiniMap
             }
 
             int zoomLevel = miniMapProperties.zoomLevel.get();
-            updateVisualZoomLevel(zoomLevel);
+            double renderZoomScale = visualZoomLevel.getScale(zoomLevel, miniMapProperties.smoothZoom.get());
 
             // Update the grid
             boolean moved = gridRenderer.center(state.getCurrentMapType(), mc.thePlayer.posX, mc.thePlayer.posZ, zoomLevel);
@@ -266,7 +262,6 @@ public class MiniMap
             {
                 // Move origin to top-left corner
                 GL11.glTranslated(dv.translateX, dv.translateY, 0);
-                double renderZoomScale = getRenderZoomScale();
                 gridRenderer.setVisualScale(renderZoomScale);
                 float playerArrowDrawScale = dv.drawScale * (float) miniMapProperties.playerArrowScale.get();
                 boolean scaleMap = renderZoomScale != 1D;
@@ -401,6 +396,7 @@ public class MiniMap
                 }
 
             }
+
             finally
             {
                 /***** END MATRIX: ROTATION *****/
@@ -524,28 +520,6 @@ public class MiniMap
         return smoothedRotation;
     }
 
-    private void updateVisualZoomLevel(int targetZoom)
-    {
-        if (!miniMapProperties.smoothZoom.get())
-        {
-            visualZoomLevel.snapTo(targetZoom);
-            return;
-        }
-        if (!visualZoomLevel.isInitialized())
-        {
-            visualZoomLevel.snapTo(targetZoom);
-        }
-        visualZoomLevel.updateTowards(targetZoom, ZOOM_SMOOTHING_RESPONSE, ZOOM_SMOOTHING_MAX_DELTA_SECONDS,
-                ZOOM_SMOOTHING_SNAP_THRESHOLD, ZOOM_SMOOTHING_JUMP_THRESHOLD);
-    }
-
-    private double getRenderZoomScale()
-    {
-        int targetZoom = miniMapProperties.zoomLevel.get();
-        double visualZoom = miniMapProperties.smoothZoom.get() ? visualZoomLevel.getValue() : targetZoom;
-        return Math.pow(2D, visualZoom - targetZoom);
-    }
-
     private void applyMapZoomScale(double centerX, double centerY, double scale)
     {
         if (scale == 1D)
@@ -604,7 +578,13 @@ public class MiniMap
         }
         else
         {
-            return centerRect.contains(gridRenderer.getWindowPosition(objectPixel));
+            double visualScale = gridRenderer.getVisualScale();
+            Rectangle2D.Double scaledCenterRect = new Rectangle2D.Double(
+                    centerPixel.getX() - (dv.minimapWidth / 2D) / visualScale,
+                    centerPixel.getY() - (dv.minimapHeight / 2D) / visualScale,
+                    dv.minimapWidth / visualScale,
+                    dv.minimapHeight / visualScale);
+            return scaledCenterRect.contains(objectPixel);
         }
     }
 
@@ -612,7 +592,6 @@ public class MiniMap
     {
         if (dv.shape == Shape.Circle)
         {
-
             // Get the bearing from center to object
             double bearing = Math.atan2(
                     objectPixel.getY() - centerPixel.getY(),
@@ -705,6 +684,7 @@ public class MiniMap
             renderHelper.glClearColor(1, 1, 1, 1f); // defensive against shaders
 
         }
+
         catch (Throwable t)
         {
             JMLogger.logOnce("Error during MiniMap.cleanup()", t);
@@ -742,8 +722,7 @@ public class MiniMap
                 && mc.displayWidth == dv.displayWidth
                 && this.dv.shape == shape
                 && this.dv.position == position
-                && this.dv.fontScale == miniMapProperties.fontScale.get())
-        {
+                && this.dv.fontScale == miniMapProperties.fontScale.get()) {
             return;
         }
 
@@ -804,8 +783,8 @@ public class MiniMap
             if (mc.theWorld != null && mc.thePlayer != null)
             {
                 BiomeGenBase biome = mc.theWorld.getBiomeGenForCoords(
-                    MathHelper.floor_double(mc.thePlayer.posX),
-                    MathHelper.floor_double(mc.thePlayer.posZ)
+                        MathHelper.floor_double(mc.thePlayer.posX),
+                        MathHelper.floor_double(mc.thePlayer.posZ)
                 );
                 biomeLabelText = biome != null ? biome.biomeName : "?";
             }
@@ -820,17 +799,20 @@ public class MiniMap
             long minutes = (worldTime % 1000L) * 60L / 1000L;
 
             String am_pm = "AM";
-            if (hours > 12) {
+            if (hours > 12)
+            {
                 hours -= 12;
                 am_pm = "PM";
-            } else if (hours == 12) {
+            }
+            else if (hours == 12)
+            {
                 am_pm = "PM";
             }
             timeLabelText = dv.timeFormatKeys.format(
-                String.format("%d", days),
-                String.format("%02d", hours),
-                String.format("%02d", minutes),
-                am_pm
+                    String.format("%d", days),
+                    String.format("%02d", hours),
+                    String.format("%02d", minutes),
+                    am_pm
             );
         }
 

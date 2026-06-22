@@ -1,4 +1,4 @@
-/*
+﻿/*
  * JourneyMap Mod <journeymap.info> for Minecraft
  * Copyright (c) 2011-2017  Techbrew Interactive, LLC <techbrew.net>.  All Rights Reserved.
  */
@@ -121,6 +121,7 @@ public class GridRenderer
 
     public void setVisualScale(double visualScale)
     {
+        // Keep hit testing in the same coordinate space as the GL scale used for rendering.
         if (Double.isNaN(visualScale) || Double.isInfinite(visualScale) || visualScale <= 0D)
         {
             this.visualScale = 1D;
@@ -141,10 +142,8 @@ public class GridRenderer
         final int startRow = -endRow;
         final int startCol = -endCol;
 
-        for (int z = startRow; z <= endRow; z++)
-        {
-            for (int x = startCol; x <= endCol; x++)
-            {
+        for (int z = startRow; z <= endRow; z++) {
+            for (int x = startCol; x <= endCol; x++) {
                 TilePos pos = new TilePos(x, z);
                 Tile tile = findNeighbor(centerTile, pos);
                 grid.put(pos, tile);
@@ -355,7 +354,6 @@ public class GridRenderer
 
     public Point2D.Double getBlockPixelInGrid(double x, double z)
     {
-
         double localBlockX = x - centerBlockX;
         double localBlockZ = z - centerBlockZ;
 
@@ -596,7 +594,6 @@ public class GridRenderer
      */
     public boolean isOnScreen(double startX, double startY, int width, int height)
     {
-
         if (screenBounds == null)
         {
             return false;
@@ -636,7 +633,8 @@ public class GridRenderer
         }
     }
 
-    private void updateGridSize() {
+    private void updateGridSize()
+    {
         int newGridSizeHeight = (int) Math.ceil(screenBounds.height / Tile.TILESIZE) + 1;
         int newGridSizeWidth = (int) Math.ceil(screenBounds.width / Tile.TILESIZE) + 1;
 

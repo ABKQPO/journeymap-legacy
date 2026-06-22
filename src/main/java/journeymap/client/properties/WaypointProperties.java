@@ -1,4 +1,4 @@
-/*
+﻿/*
  * JourneyMap Mod <journeymap.info> for Minecraft
  * Copyright (c) 2011-2017  Techbrew Interactive, LLC <techbrew.net>.  All Rights Reserved.
  */
@@ -51,10 +51,10 @@ public class WaypointProperties extends PropertiesBase implements Comparable<Way
     public final AtomicInteger fontScale = new AtomicInteger(2);
 
 
-    @Config(category = Waypoint, key = "jm.waypoint.fullscreen_icon_scale", minValue = 0.1, maxValue = 10.0, defaultValue = 1.0)
+    @Config(category = Waypoint, key = "jm.waypoint.fullscreen_icon_scale", minValue = 0.1, maxValue = 10.0, defaultValue = 1.0, suffix = "x")
     public final AtomicDouble fullscreenIconScale = new AtomicDouble(1D);
 
-    @Config(category = Waypoint, key = "jm.waypoint.minimap_icon_scale", minValue = 0.1, maxValue = 10.0, defaultValue = 1.0)
+    @Config(category = Waypoint, key = "jm.waypoint.minimap_icon_scale", minValue = 0.1, maxValue = 10.0, defaultValue = 1.0, suffix = "x")
     public final AtomicDouble minimapIconScale = new AtomicDouble(1D);
 
     @Config(category = Waypoint, key = "jm.waypoint.max_distance", minValue = 0, maxValue = 10000, defaultValue = 0)
