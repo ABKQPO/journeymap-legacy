@@ -142,8 +142,10 @@ public class GridRenderer
         final int startRow = -endRow;
         final int startCol = -endCol;
 
-        for (int z = startRow; z <= endRow; z++) {
-            for (int x = startCol; x <= endCol; x++) {
+        for (int z = startRow; z <= endRow; z++)
+        {
+            for (int x = startCol; x <= endCol; x++)
+            {
                 TilePos pos = new TilePos(x, z);
                 Tile tile = findNeighbor(centerTile, pos);
                 grid.put(pos, tile);

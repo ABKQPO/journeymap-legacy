@@ -722,7 +722,8 @@ public class MiniMap
                 && mc.displayWidth == dv.displayWidth
                 && this.dv.shape == shape
                 && this.dv.position == position
-                && this.dv.fontScale == miniMapProperties.fontScale.get()) {
+                && this.dv.fontScale == miniMapProperties.fontScale.get())
+        {
             return;
         }
 

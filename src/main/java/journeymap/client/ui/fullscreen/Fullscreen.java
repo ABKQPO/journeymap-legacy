@@ -172,7 +172,8 @@ public class Fullscreen extends JmUI
             }
             else
             {
-                for (int k = 0; k < this.buttonList.size(); ++k) {
+                for (int k = 0; k < this.buttonList.size(); ++k)
+                {
                     GuiButton guibutton = (GuiButton) this.buttonList.get(k);
                     guibutton.drawButton(this.mc, width, height);
                     if (tooltip == null)
@@ -214,7 +215,8 @@ public class Fullscreen extends JmUI
     }
 
     @Override
-    protected void actionPerformed(GuiButton guibutton) { // actionPerformed
+    protected void actionPerformed(GuiButton guibutton)
+    { // actionPerformed
 
         if (guibutton instanceof ThemeToolbar)
         {
@@ -255,7 +257,8 @@ public class Fullscreen extends JmUI
     /**
      * Set up UI buttons.
      */
-    void initButtons() {
+    void initButtons()
+    {
         if (buttonList.isEmpty())
         {
             firstLayoutPass = true;
@@ -597,7 +600,8 @@ public class Fullscreen extends JmUI
     }
 
     @Override
-    public void handleMouseInput() { // handleMouseInput
+    public void handleMouseInput()
+    { // handleMouseInput
 
         if (chat != null && !chat.isHidden())
         {
@@ -705,14 +709,16 @@ public class Fullscreen extends JmUI
         }
     }
 
-    void zoomIn() {
+    void zoomIn()
+    {
         if (fullMapProperties.zoomLevel.get() < state.maxZoom)
         {
             setZoom(fullMapProperties.zoomLevel.get() + 1);
         }
     }
 
-    void zoomOut() {
+    void zoomOut()
+    {
         if (fullMapProperties.zoomLevel.get() > state.minZoom)
         {
             setZoom(fullMapProperties.zoomLevel.get() - 1);
@@ -729,11 +735,13 @@ public class Fullscreen extends JmUI
         }
     }
 
-    void toggleFollow() {
+    void toggleFollow()
+    {
         setFollow(!state.follow.get());
     }
 
-    void setFollow(Boolean follow) {
+    void setFollow(Boolean follow)
+    {
         state.follow.set(follow);
         if (state.follow.get())
         {
@@ -1023,7 +1031,8 @@ public class Fullscreen extends JmUI
     /**
      * Get a snapshot of the player's biome, effective map state, etc.
      */
-    void refreshState() {
+    void refreshState()
+    {
         // Check player status
         EntityPlayer player = mc.thePlayer;
         if (player == null)
@@ -1075,7 +1084,8 @@ public class Fullscreen extends JmUI
         timer.stop();
     }
 
-    void openChat(String defaultText) {
+    void openChat(String defaultText)
+    {
         if (chat != null)
         {
             chat.setText(defaultText);
@@ -1103,7 +1113,8 @@ public class Fullscreen extends JmUI
         Keyboard.enableRepeatEvents(false);
     }
 
-    boolean isRefreshReady() {
+    boolean isRefreshReady()
+    {
         if (isScrolling)
         {
             return false;
@@ -1114,7 +1125,8 @@ public class Fullscreen extends JmUI
         }
     }
 
-    void moveCanvas(int deltaBlockX, int deltaBlockz) {
+    void moveCanvas(int deltaBlockX, int deltaBlockz)
+    {
         refreshState();
         gridRenderer.move(deltaBlockX, deltaBlockz);
         gridRenderer.updateTiles(state.getCurrentMapType(), state.getZoom(), state.isHighQuality(), mc.displayWidth, mc.displayHeight, true, 0, 0);
