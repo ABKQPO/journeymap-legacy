@@ -39,6 +39,8 @@ public @interface Config
 
     boolean defaultBoolean() default true;
 
+    String suffix() default "";
+
     int sortOrder() default 100;
 
     public enum Category
