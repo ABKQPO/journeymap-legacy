@@ -22,6 +22,7 @@ import journeymap.client.model.MapType;
 import journeymap.client.model.Waypoint;
 import journeymap.client.properties.FullMapProperties;
 import journeymap.client.properties.MiniMapProperties;
+import journeymap.client.properties.WaypointProperties;
 import journeymap.client.render.draw.DrawUtil;
 import journeymap.client.render.draw.RadarDrawStepFactory;
 import journeymap.client.render.draw.WaypointDrawStepFactory;
@@ -909,6 +910,9 @@ public class Fullscreen extends JmUI
 
             gridRenderer.updateRotation(0);
             float drawScale = fullMapProperties.textureSmall.get() ? 1f : 2f;
+            WaypointProperties waypointProperties = JourneymapClient.getWaypointProperties();
+            float waypointDrawScale = drawScale * (float) waypointProperties.fullscreenIconScale.get();
+            float playerArrowDrawScale = drawScale * (float) fullMapProperties.playerArrowScale.get();
 
             if (state.follow.get())
             {
@@ -917,18 +921,18 @@ public class Fullscreen extends JmUI
             gridRenderer.updateTiles(state.getCurrentMapType(), state.getZoom(), state.isHighQuality(), mc.displayWidth, mc.displayHeight, false, 0, 0);
             gridRenderer.draw(1f, xOffset, yOffset, fullMapProperties.showGrid.get());
             gridRenderer.draw(state.getDrawSteps(), xOffset, yOffset, drawScale, getMapFontScale(), 0);
-            gridRenderer.draw(state.getDrawWaypointSteps(), xOffset, yOffset, drawScale, getMapFontScale(), 0);
+            gridRenderer.draw(state.getDrawWaypointSteps(), xOffset, yOffset, waypointDrawScale, getMapFontScale(), 0);
 
             if (fullMapProperties.showSelf.get())
             {
                 Point2D playerPixel = gridRenderer.getPixel(mc.thePlayer.posX, mc.thePlayer.posZ);
                 if (playerPixel != null)
                 {
-                    DrawUtil.drawEntity(playerPixel.getX() + xOffset, playerPixel.getY() + yOffset, mc.thePlayer.rotationYawHead, false, TextureCache.instance().getPlayerLocatorSmall(), drawScale, 0);
+                    DrawUtil.drawEntity(playerPixel.getX() + xOffset, playerPixel.getY() + yOffset, mc.thePlayer.rotationYawHead, false, TextureCache.instance().getPlayerLocatorSmall(), playerArrowDrawScale, 0);
                 }
             }
 
-            gridRenderer.draw(layerDelegate.getDrawSteps(), xOffset, yOffset, drawScale, getMapFontScale(), 0);
+            gridRenderer.draw(layerDelegate.getDrawSteps(), xOffset, yOffset, waypointDrawScale, getMapFontScale(), 0);
 
             DrawUtil.drawLabel(state.playerLastPos, mc.displayWidth / 2, mc.displayHeight, DrawUtil.HAlign.Center, DrawUtil.VAlign.Above,
                     statusBackgroundColor, statusBackgroundAlpha, statusForegroundColor, statusForegroundAlpha, getMapFontScale(), true);
